@@ -18,7 +18,7 @@ For example:
 #include <algorithm>
 
 // Returns the string index where the floorCounter is first encountered as -1, otherwise Returns -1 if not found.
-int findBasementIndex(std::string puzzleInput)
+static int findBasementIndex(std::string puzzleInput)
 {
     signed floorCounter = 0;
     unsigned int puzzleInputPosIndex = 1;
@@ -36,11 +36,11 @@ int findBasementIndex(std::string puzzleInput)
 }
 
 // Returns the sum of all floor directions in the given string
-unsigned int sumFloorInstruction(std::string puzzleInput)
+static int sumFloorInstruction(std::string puzzleInput)
 {
     unsigned int upCounter   = std::count(puzzleInput.begin(), puzzleInput.end(), '(');
     unsigned int downCounter = std::count(puzzleInput.begin(), puzzleInput.end(), ')');
-    signed int floorCounter = upCounter - downCounter;
+    int floorCounter = upCounter - downCounter;
 
     return floorCounter;
 }
