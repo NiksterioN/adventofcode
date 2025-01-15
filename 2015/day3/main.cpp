@@ -8,7 +8,7 @@
 using Point = std::pair<int, int>;
 
 // Moves the point north (^), south (v), east (>), or west (<)
-Point movePoint(const Point& point, const char& direction)
+static Point movePoint(const Point& point, const char& direction)
 {
     Point currentPoint = point;
     switch (direction)
@@ -32,7 +32,7 @@ Point movePoint(const Point& point, const char& direction)
 }
 
 // Returns a vector containing the visited points in std::pair<x, y>
-std::vector<Point> createVisitedPoints(const std::string& listOfDirection)
+static std::vector<Point> createVisitedPoints(const std::string& listOfDirection)
 {
     Point currentPoint(0, 0);
     std::vector<Point> listOfPoints({ currentPoint });
@@ -48,7 +48,7 @@ std::vector<Point> createVisitedPoints(const std::string& listOfDirection)
     return listOfPoints;
 }
 
-bool testFunctions()
+static bool testFunctions()
 {
     const std::string testDirectionA = "^";
     const std::string testDirectionB = "^v";
@@ -65,10 +65,10 @@ bool testFunctions()
     return true;
 }
 
-// Returns TRUE if the number is even, otherwise returns FALSE.
-inline bool isEven(const int &n)
+// Returns TRUE if the number is Odd, otherwise returns FALSE.
+static inline bool isOdd(const int &n)
 {
-    return n % 2;
+    return n & 1;
 }
 
 int main(void)
@@ -88,7 +88,7 @@ int main(void)
     std::string listofRoboSantaDirection;
     for (int i = 0; i < listOfDirection.size(); ++i)
     {
-        if (isEven(i)) listofRoboSantaDirection += listOfDirection[i];
+        if (isOdd(i)) listofRoboSantaDirection += listOfDirection[i];
         else listOfSantaDirection += listOfDirection[i];
     }
 
