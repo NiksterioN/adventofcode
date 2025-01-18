@@ -5,6 +5,7 @@
 #include <vector>
 #include <set>
 
+/* Part A */
 // Returns TRUE if a character is a vowel, otherwise returns FALSE
 static bool isVowel(const char &c)
 {
@@ -27,7 +28,7 @@ static bool containsNVowels(const std::string &word, const int n)
 }
 
 // Returns TRUE if a string contains a pair of any two same letters with N letters in between
-static bool containsNLettersBetweenXLetters(const std::string &word, const int &n)
+static bool containsNLettersBetweenXLetters(const std::string& word, const int& n)
 {
     const int indexDifference = n + 1;
     for (std::size_t currentIndex = 0; currentIndex < word.length() - 1; ++currentIndex)
@@ -38,10 +39,9 @@ static bool containsNLettersBetweenXLetters(const std::string &word, const int &
         if ((secondIndex - currentIndex) == indexDifference)
             return true;
     }
-   
+
     return false;
 }
-
 // Returns TRUE if a string contains XX Letters, otherwise returns FALSE
 static bool containsXXLetters(const std::string& word)
 {
@@ -66,13 +66,15 @@ A "nice" string is one with all of the following properties:
 
 Otherwise, the string is as a "naughty" string
 */
-static bool isNiceString(const std::string &word)
+static bool isNiceStringPartA(const std::string &word)
 {   
     return containsNVowels(word, 3) && containsNLettersBetweenXLetters(word, 0) && !containsXXLetters(word);
 }
 
+/* PartB */
+
 // Returns the number of nice strings in a listOfString
-static int countNiceString(const std::vector<std::string> listOfString)
+static int countNiceString(const std::vector<std::string> listOfString, static bool (*isNiceString)(const std::string&))
 {
     int niceStringCounter = 0;
     
@@ -105,24 +107,53 @@ static bool testFunctionPartA()
     assert(containsXXLetters(wordD) == true);
 
 
-    assert(isNiceString(wordA) == true);
-    assert(isNiceString(wordB) == true);
-    assert(isNiceString(wordC) == false); // no double letter
-    assert(isNiceString(wordD) == false); // contains string xy
-    assert(isNiceString(wordE) == false); // contains only one vowel
+    assert(isNiceStringPartA(wordA) == true);
+    assert(isNiceStringPartA(wordB) == true);
+    assert(isNiceStringPartA(wordC) == false); // no double letter
+    assert(isNiceStringPartA(wordD) == false); // contains string xy
+    assert(isNiceStringPartA(wordE) == false); // contains only one vowel
 
-    assert(countNiceString(lowA) == 2);
+    assert(countNiceString, isNiceStringPartA(lowA) == 2);
 
     std::cout << __func__ << ": Test Pass" << std::endl;
     return true;
 }
 
 // Returns TRUE if a string contains a pair of any two letters
+// that appears at least twice in the string starting at a given startIndex
+static bool searchTwoXXLettersWithoutOverlap(const std::string &word, const int startIndex)
+{
+    for (int i = startIndex; i < word.size() - 1; i += 2)
+    {
+        std::string currentString = word.substr(i, 2);
+        if (word.find(currentString, i + 2) != std::string::npos)
+            return true;
+        currentString = word.substr(i, i + 2);
+    }
+
+    return false;
+}
+
+// Returns TRUE if a string contains a pair of any two letters
 // that appears at least twice in the string without overlapping
 // Otherwise, returns FALSE
-static bool containsTwoXXLetters(const std::string &word)
+static bool containsTwoXXLettersWithoutOverlap(const std::string &word)
 {
-    return true;
+    return searchTwoXXLettersWithoutOverlap(word, 0) || searchTwoXXLettersWithoutOverlap(word, 1);
+}
+
+
+// Returns TRUE if a string is nice, otherwise FALSE.
+/*
+
+    It contains a pair of any two letters that appears at least twice in the string without overlapping, like xyxy (xy) or aabcdefgaa (aa), but not like aaa (aa, but it overlaps).
+    It contains at least one letter which repeats with exactly one letter between them, like xyx, abcdefeghi (efe), or even aaa.
+
+Otherwise, the string is as a "naughty" string
+*/
+static bool isNiceStringPartB(const std::string& word)
+{
+    return containsTwoXXLettersWithoutOverlap(word) && containsNLettersBetweenXLetters(word, 1);
 }
 
 static bool testFunctionPartB()
@@ -131,21 +162,30 @@ static bool testFunctionPartB()
     std::string wordB("xxyxx");             // nice
     std::string wordC("uurcxstgmygtbstg");  // naughty
     std::string wordD("ieodomkazucvgmuy");  // naughty
+    
+    std::vector<std::string> listOfStringA{ wordA, wordB, wordC, wordD };
+
+    assert(containsTwoXXLettersWithoutOverlap(wordA) == true);
+    assert(containsTwoXXLettersWithoutOverlap(wordB) == true);
+    assert(containsTwoXXLettersWithoutOverlap(wordC) == true);
+    assert(containsTwoXXLettersWithoutOverlap("aaa") == false);
+    assert(containsTwoXXLettersWithoutOverlap("xyxy") == true);
+    assert(containsTwoXXLettersWithoutOverlap("aabcdefgaa") == true);
 
     assert(containsNLettersBetweenXLetters("xyxy", 1) == true);
     assert(containsNLettersBetweenXLetters("aaa", 1) == false);
+
+    assert(countNiceString(listOfStringA, isNiceStringPartB) == 2);
 
     std::cout << __func__ << ": Test Pass" << std::endl;
 
     return true;
 }
 
-
-
 int main()
 {
     //testFunctionPartA();
-    testFunctionPartB();
+    //testFunctionPartB();
     std::vector<std::string> listOfString;
     listOfString.reserve(1000);
     std::string direction;
@@ -154,7 +194,7 @@ int main()
         listOfString.push_back(direction);
     }
     
-    std::cout << "Nice Strings:  " << countNiceString(listOfString) << std::endl;
-
+    std::cout << "Nice Strings PartA:  " << countNiceString(listOfString, isNiceStringPartA) << std::endl;
+    std::cout << "Nice Strings PartB:  " << countNiceString(listOfString, isNiceStringPartB) << std::endl;
     return 0;
 }
