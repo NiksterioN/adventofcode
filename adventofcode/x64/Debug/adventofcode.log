@@ -1,0 +1,11 @@
+﻿  main.cpp
+C:\Users\A67222\OneDrive - Microchip Technology Inc\Desktop\advent\2015\day4\src\hl_hashwrapper.h(223,59): warning C4267: 'argument': conversion from 'size_t' to 'unsigned int', possible loss of data
+  (compiling source file '2015/day4/main.cpp')
+  
+C:\Users\A67222\OneDrive - Microchip Technology Inc\Desktop\advent\2015\day4\src\hl_hashwrapper.h(275,23): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
+  (compiling source file '2015/day4/main.cpp')
+  
+C:\Users\A67222\OneDrive - Microchip Technology Inc\Desktop\advent\2015\day4\src\hl_hashwrapper.h(263,15): warning C4996: 'fopen': This function or variable may be unsafe. Consider using fopen_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+  (compiling source file '2015/day4/main.cpp')
+  
+  adventofcode.vcxproj -> C:\Users\A67222\OneDrive - Microchip Technology Inc\Desktop\advent\x64\Debug\adventofcode.exe
