@@ -7,13 +7,13 @@
 #include <cctype>
 
 using Point = std::pair<int, int>;
-using PointStateMap = std::map<Point, bool>;
+using PointStateMap = std::map<Point, int>;
 
 // Returns true if PointStateMap initialization is done
 static bool initializePointStateMap(PointStateMap &pMap, 
 									const int &numberOfRows, 
 									const int &numberOfColumns,  
-									const bool &allInitialState = false)
+									const int &allInitialState = 0)
 {
 
 	for (int x = 0; x < numberOfColumns; ++x)
@@ -25,8 +25,9 @@ static bool initializePointStateMap(PointStateMap &pMap,
 	return true;
 }
 
+
 // Returns TRUE if an instruction is successfully executed, otherwise returns FALSE.
-static bool executeInstruction(const std::string &instruction, const Point &currentPoint, PointStateMap &pMap)
+static bool executeInstructionSetA(const std::string &instruction, const Point &currentPoint, PointStateMap &pMap)
 {
 	if (instruction.find("on") != std::string::npos)
 		pMap[currentPoint] = true;
@@ -43,6 +44,30 @@ static bool executeInstruction(const std::string &instruction, const Point &curr
 	return true;
 }
 
+// Returns TRUE if an instruction is successfully executed, otherwise returns FALSE.
+/*
+The phrase turn on actually means that you should increase the brightness of those lights by 1.
+The phrase turn off actually means that you should decrease the brightness of those lights by 1, to a minimum of zero.
+The phrase toggle actually means that you should increase the brightness of those lights by 2.
+*/
+static bool executeInstructionSetB(const std::string& instruction, const Point& currentPoint, PointStateMap& pMap)
+{
+	if (instruction.find("on") != std::string::npos)
+		pMap[currentPoint] += 1;
+	else if (instruction.find("off") != std::string::npos)
+	{
+		if (pMap[currentPoint] > 0) pMap[currentPoint] -= 1;
+	}
+	else if (instruction.find("toggle") != std::string::npos)
+		pMap[currentPoint] += 2;
+	else
+	{
+		std::cerr << "No keyword matching [on, off, toggle] found.";
+		return false;
+	}
+
+	return true;
+}
 // Returns by reference the startPoint and stopPoint in a given instruction
 static bool parsePointInstruction(const std::string& instruction, Point& startPoint, Point& stopPoint)
 {
@@ -79,7 +104,7 @@ static bool parsePointInstruction(const std::string& instruction, Point& startPo
  * toggle 0, 0 through 999, 0 would toggle the first line of 1000 lights, turning off the ones that were on, and turning on the ones that were off.
  * turn off 499, 499 through 500, 500 would turn off(or leave off) the middle four lights.
 */
-static PointStateMap executeInstructionList(const std::vector<std::string>& instructionList)
+static PointStateMap executeInstructionList(const std::vector<std::string>& instructionList, bool (*executeInstructionSetB)(const std::string& instruction, const Point& currentPoint, PointStateMap& pMap))
 {
 	PointStateMap pMap;
 	initializePointStateMap(pMap, 1000, 1000);
@@ -91,7 +116,7 @@ static PointStateMap executeInstructionList(const std::vector<std::string>& inst
 		for (int i = startPoint.first; i <= endPoint.first; ++i)
 		{
 			for (int j = startPoint.second; j <= endPoint.second; ++j)
-				executeInstruction(instruction, std::make_pair(i, j), pMap);
+				executeInstructionSetB(instruction, std::make_pair(i, j), pMap);
 		}
 	}
 
@@ -104,8 +129,7 @@ static int countNumberOfOnStates(const PointStateMap& pMap)
 	int numberOfOnStates = 0;
 	for (auto it = pMap.begin(); it != pMap.end(); ++it)
 	{
-		if (it->second == true)
-			++numberOfOnStates;
+		numberOfOnStates += it->second;
 	}
 	return numberOfOnStates;
 }
@@ -146,7 +170,8 @@ int main(void)
 		instructionList.push_back(instruction);
 	}
 
-	std::cout << countNumberOfOnStates(executeInstructionList(instructionList)) << std::endl;
+	std::cout << "PartA: " << countNumberOfOnStates(executeInstructionList(instructionList, executeInstructionSetA)) << std::endl;
+	std::cout << "PartB: " << countNumberOfOnStates(executeInstructionList(instructionList, executeInstructionSetB)) << std::endl;
 
 	return 0;
 }
