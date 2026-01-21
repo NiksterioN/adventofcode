@@ -1,6 +1,7 @@
-import time
-import cProfile
-import pstats
+"""
+See https://adventofcode.com/2025/day/4 for full details
+"""
+
 
 class Matrix:
     def __init__(self, matrix):
@@ -22,7 +23,19 @@ class Matrix:
                     self.all_rolls.add((r, c))
 
     def __str__(self):
-        return "\n".join(self.current_matrix) + "\n"
+        number_of_row = len(self.original_matrix)
+        number_of_column = len(self.original_matrix[0])
+        current_matrix = []
+        for r in range(0, number_of_row):
+            row = []
+            for c in range(0, number_of_column):
+                if (r, c) in self.all_rolls:
+                    row.append('@')
+                else:
+                    row.append('.')
+            current_matrix.append("".join(row))
+
+        return "\n".join(current_matrix) + "\n"
 
     @property
     def traverse_matrix(self):
@@ -113,7 +126,7 @@ def test_function():
     assert (test_matrix.get_adjacent_sum((len(grid) - 1, len(grid[0]) - 1)) == 2)
 
     assert (test_matrix.traverse_matrix == 13)
-    test_matrix = Matrix(grid)
+    test_matrix.reset()
     assert (test_matrix.traverse_matrix_recursively == 43)
 
     print("-- All Unit Tests Passed! --")
@@ -123,23 +136,14 @@ def test_function():
 def main():
     test_function()
 
-    filename = "in.txt"
+    filename = input("Enter filename: ")
     with open(filename, "r") as file:
         matrix = file.read().split()
         puzzle_matrix = Matrix(matrix)
-        start = time.time()
         print(puzzle_matrix.traverse_matrix)
 
-        with cProfile.Profile() as pr:
-            print(puzzle_matrix.traverse_matrix_recursively)
-
-        stats = pstats.Stats(pr)
-        stats.sort_stats(pstats.SortKey.TIME)
-        stats.print_stats()
-
-        end = time.time()
-
-        print(end - start)
+        puzzle_matrix.reset()
+        print(puzzle_matrix.traverse_matrix_recursively)
 
 
 if __name__ == "__main__":
