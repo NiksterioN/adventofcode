@@ -1,20 +1,28 @@
-from collections import deque
 import time
-
+import cProfile
+import pstats
 
 class Matrix:
     def __init__(self, matrix):
         self.original_matrix = matrix.copy()
-        self.current_matrix = matrix.copy()
-        self.next_matrix = []
-        self.number_of_row = len(self.current_matrix)
-        self.number_of_column = len(self.current_matrix[0])
+        self.accessible_rolls = set()
+        self.all_rolls = set()
+
+        for r, r_elem in enumerate(matrix):
+            for c, c_elem in enumerate(matrix[r]):
+                if c_elem == "@":
+                    self.all_rolls.add((r, c))
 
     def reset(self):
-        self.current_matrix = self.original_matrix.copy()
+        self.all_rolls.clear()
+        self.accessible_rolls.clear()
+        for r, r_elem in enumerate(self.original_matrix):
+            for c, c_elem in enumerate(self.original_matrix[r]):
+                if c_elem == "@":
+                    self.all_rolls.add((r, c))
 
-    def print(self):
-        print(self.current_matrix)
+    def __str__(self):
+        return "\n".join(self.current_matrix) + "\n"
 
     @property
     def traverse_matrix(self):
@@ -30,20 +38,12 @@ class Matrix:
         :return: The number of accessible paper rolls
         """
         total_accessible_rolls = 0
-
-        for r in range(self.number_of_row):
-            new_row = []
-            for c in range(self.number_of_column):
-                if self.current_matrix[r][c] == "@" and self.is_accessible_by_forklift((r, c)):
-                    total_accessible_rolls = total_accessible_rolls + 1
-                    new_row.append(".")
-                else:
-                    new_row.append(self.current_matrix[r][c])
-
-            self.next_matrix.append(["".join(new_row)])
-
-        self.current_matrix = self.next_matrix.copy()
-        self.next_matrix = []
+        for roll in self.all_rolls:
+            if self.is_accessible_by_forklift(roll):
+                total_accessible_rolls = total_accessible_rolls + 1
+                self.accessible_rolls.add(roll)
+        self.all_rolls = self.all_rolls - self.accessible_rolls
+        self.accessible_rolls.clear()
         return total_accessible_rolls
 
     @property
@@ -51,22 +51,20 @@ class Matrix:
         """
         Recursively iterates to solve the number of accessible rolls within the matrix (with each accessible paper rolls removed per call),
         until there is no more accessible rolls to remove.
-
         :return: The total number of rolls that can be removed
         """
-        total_number_of_rolls = 0
+
         current_number_of_rolls = self.traverse_matrix
         total_number_of_rolls = current_number_of_rolls
+
         while current_number_of_rolls > 0:
             current_number_of_rolls = self.traverse_matrix
             total_number_of_rolls = total_number_of_rolls + current_number_of_rolls
-
         return total_number_of_rolls
 
     def is_accessible_by_forklift(self, coordinate):
         """
         Checks if there are fewer than four (4) paper rolls in the eight adjacent positions.
-        :param matrix: The matrix or diagram
         :param coordinate: (r, c) : The position to check in the matrix
 
         :return:    True if the there are fewer than four (4) paper rolls in the eight adjacent positions.
@@ -90,14 +88,7 @@ class Matrix:
         number_of_adjacent_rolls = 0
         for r in range(coordinates[0] - 1, coordinates[0] + 2):
             for c in range(coordinates[1] - 1, coordinates[1] + 2):
-                # Boundary conditions
-                if r >= self.number_of_row or r < 0:
-                    continue
-                if c >= self.number_of_column or c < 0:
-                    continue
-                if (r, c) == coordinates:
-                    continue
-                if self.current_matrix[r][c] == "@":
+                if (r, c) != coordinates and (r, c) in self.all_rolls:
                     number_of_adjacent_rolls = number_of_adjacent_rolls + 1
         return number_of_adjacent_rolls
 
@@ -122,10 +113,10 @@ def test_function():
     assert (test_matrix.get_adjacent_sum((len(grid) - 1, len(grid[0]) - 1)) == 2)
 
     assert (test_matrix.traverse_matrix == 13)
-    test_matrix.reset()
+    test_matrix = Matrix(grid)
     assert (test_matrix.traverse_matrix_recursively == 43)
 
-    print("test done")
+    print("-- All Unit Tests Passed! --")
     return True
 
 
@@ -138,7 +129,14 @@ def main():
         puzzle_matrix = Matrix(matrix)
         start = time.time()
         print(puzzle_matrix.traverse_matrix)
-        print(puzzle_matrix.traverse_matrix_recursively)
+
+        with cProfile.Profile() as pr:
+            print(puzzle_matrix.traverse_matrix_recursively)
+
+        stats = pstats.Stats(pr)
+        stats.sort_stats(pstats.SortKey.TIME)
+        stats.print_stats()
+
         end = time.time()
 
         print(end - start)
